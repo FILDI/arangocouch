@@ -19,7 +19,7 @@ const defaultMonitor = new Arangocouch("http://127.0.0.1:8529/"); // ArangoDB no
 
 const monitorWithDB = new Arangocouch("http://127.0.0.1:8529/myDb"); // ArangoDB node to monitor, with database name
 
-const monitorWithAuth = new arangochair({
+const monitorWithAuth = new Arangocouch({
   port: 8529,
   path: "/myDb",
   protocol: "http",
