@@ -1,6 +1,8 @@
 # arangocouch
 
-`arangocouch` is a fork of [arangochair](https://github.com/baslr/arangochair) but since there were issues with the project and PRs attempting to fix it were not reviewed. We've created `arangocouch`
+`arangocouch` is a fork of [arangochair](https://github.com/baslr/arangochair) but since there were issues with the project and PRs attempting to fix thme were not reviewed we've created `arangocouch`.
+
+Currently this repo includes the fix for making authenticated requests to arangodb.
 
 ## install
 
