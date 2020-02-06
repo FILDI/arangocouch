@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "lodash.isstring": "^4.0.1",
+    "request-easy": "^2.0.1"
+  },
+  "name": "arangocouch",
+  "version": "0.0.1",
+  "description": "`arangocouch` pushs ArangoDB changes in realtime to you",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FILDI/arangocouch.git"
+  },
+  "keywords": [
+    "arangodb",
+    "push",
+    "realtime",
+    "watch",
+    "monitor"
+  ],
+  "author": "Gurgen Hayrapetyan",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/FILDI/arangocouch/issues"
+  },
+  "homepage": "https://github.com/FILDI/arangocouch#readme"
+}
