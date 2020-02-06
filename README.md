@@ -5,7 +5,7 @@
 ## install
 
 ```bash
-npm install --save git+https://git@github.com/FILDI/arangocouch.git
+npm install --save FILDI/arangocouch#master
 ```
 
 ## quick example
