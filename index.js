@@ -1,35 +1,30 @@
-"use strict";
+'use strict';
 
-const EventEmitter = require("events");
+const EventEmitter = require('events');
 
-const https = require("request-easy").https;
-const http = require("request-easy").http;
-const url = require("url");
-const isString = require("lodash.isstring");
+const url = require('url');
+const http = require('request-easy').http;
+const isString = require('lodash.isstring');
+const https = require('request-easy').https;
 
 const mapTextToType = {
-  "insert/update": 2300,
-  delete: 2302
+  'insert/update': 2300,
+  delete: 2302,
 };
 const mapTypeToText = new Map([
-  [2300, "insert/update"],
-  [2302, "delete"]
+  [2300, 'insert/update'],
+  [2302, 'delete'],
 ]);
 
-class ArangoChair extends EventEmitter {
+class ArangoCouch extends EventEmitter {
   constructor(opts) {
     super();
-    let adbUrl;
-    if (isString(opts)) {
-      adbUrl = opts;
-    } else {
-      adbUrl = url.format(opts);
-    }
 
-    adbUrl = url.parse(adbUrl);
-    this.req = new (adbUrl.protocol === "https:" ? https : http)(adbUrl);
+    const adbUrl = url.parse(isString(opts) ? opts : url.format(opts));
 
-    const db = "/" === adbUrl.pathname ? "/_system" : adbUrl.pathname;
+    this.req = new (adbUrl.protocol === 'https:' ? https : http)(adbUrl);
+
+    const db = '/' === adbUrl.pathname ? '/_system' : adbUrl.pathname;
 
     this._loggerStatePath = `/_db${db}/_api/replication/logger-state`;
     this._loggerFollowPath = `/_db${db}/_api/replication/logger-follow`;
@@ -50,13 +45,13 @@ class ArangoChair extends EventEmitter {
   _startLoggerState() {
     this.req.get({ path: this._loggerStatePath }, (status, headers, body) => {
       if (200 !== status) {
-        this.emit("error", new Error("E_LOGGERSTATE"), status, headers, body);
+        this.emit('error', new Error('E_LOGGERSTATE'), status, headers, body);
         this.stop();
         return;
       } // if
 
       body = JSON.parse(body);
-      //console.log(body)
+
       let lastLogTick = body.state.lastLogTick;
       let start = 0;
       let idx = 0;
@@ -74,12 +69,12 @@ class ArangoChair extends EventEmitter {
 
         if (undefined === colConf) return;
 
-        const events = colConf.get("events");
+        const events = colConf.get('events');
 
         if (0 !== events.size && !events.has(type)) return;
 
         const key = entry.data._key;
-        const keys = colConf.get("keys");
+        const keys = colConf.get('keys');
 
         if (0 !== keys.size && !events.has(key)) return;
 
@@ -87,43 +82,36 @@ class ArangoChair extends EventEmitter {
       };
 
       const ticktock = () => {
-        //console.log("tick tock")
         if (this._stopped) return;
 
-        //console.log("req", `${this._loggerFollowPath}?from=${lastLogTick}`)
         this.req.get(
           { path: `${this._loggerFollowPath}?from=${lastLogTick}` },
           (status, headers, body) => {
             if (204 < status || 0 === status) {
               this.emit(
-                "error",
-                new Error("E_LOGGERFOLLOW"),
+                'error',
+                new Error('E_LOGGERFOLLOW'),
                 status,
                 headers,
-                body
+                body,
               );
               this.stop();
               return;
             } // if
 
-            lastLogTick = headers["x-arango-replication-lasttick"];
+            lastLogTick = headers['x-arango-replication-lasttick'];
 
-            if ("0" === headers["x-arango-replication-lastincluded"]) {
-              //console.log("last included == 0, waiting 500ms")
+            if ('0' === headers['x-arango-replication-lastincluded']) {
               return setTimeout(ticktock, 500);
             } // if
 
             start = idx = 0;
             while (true) {
-              idx = body.indexOf("\n", start);
+              idx = body.indexOf('\n', start);
               if (-1 === idx) break;
 
               entry = JSON.parse(body.slice(start, idx));
               start = idx + 1;
-
-              // transaction   {"tick":"514132959101","type":2200,"tid":"514132959099","database":"1"}
-              // insert/update {"tick":"514092205556","type":2300,"tid":"0","database":"1","cid":"513417247371","cname":"test","data":{"_id":"test/testkey","_key":"testkey","_rev":"514092205554",...}}
-              // delete        {"tick":"514092206277","type":2302,"tid":"0","database":"1","cid":"513417247371","cname":"test","data":{"_key":"abcdef","_rev":"514092206275"}}
 
               type = entry.type;
 
@@ -145,7 +133,7 @@ class ArangoChair extends EventEmitter {
               } else {
                 if (2300 !== type && 2302 !== type) continue;
 
-                if ("0" !== tid) {
+                if ('0' !== tid) {
                   txns.get(tid).add([type, entry]);
                   continue;
                 } // if
@@ -154,7 +142,7 @@ class ArangoChair extends EventEmitter {
               } // else
             } // while
             ticktock();
-          }
+          },
         );
       };
       ticktock();
@@ -162,7 +150,7 @@ class ArangoChair extends EventEmitter {
   }
 
   subscribe(confs) {
-    if ("string" === typeof confs) confs = { collection: confs };
+    if ('string' === typeof confs) confs = { collection: confs };
     if (!Array.isArray(confs)) confs = [confs];
 
     for (const conf of confs) {
@@ -171,38 +159,38 @@ class ArangoChair extends EventEmitter {
         colConfMap = this.collectionsMap.get(conf.collection);
       } else {
         colConfMap = new Map([
-          ["events", new Set()],
-          ["keys", new Set()]
+          ['events', new Set()],
+          ['keys', new Set()],
         ]);
         this.collectionsMap.set(conf.collection, colConfMap);
       }
 
       if (conf.events) {
         for (const event of conf.events) {
-          colConfMap.get("events").add(mapTextToType[event]);
+          colConfMap.get('events').add(mapTextToType[event]);
         } // for
       } // if
       if (conf.keys) {
         for (const key of conf.keys) {
-          colConfMap.get("keys").add(key);
+          colConfMap.get('keys').add(key);
         } // for
       } // if
     } // for
   } // subscribe()
 
   unsubscribe(confs) {
-    if ("string" === typeof confs) confs = { collection: confs };
+    if ('string' === typeof confs) confs = { collection: confs };
     if (!Array.isArray(confs)) confs = [confs];
 
     for (const conf of confs) {
       if (conf.events) {
-        const events = this.collectionsMap.get(conf.collection).get("events");
+        const events = this.collectionsMap.get(conf.collection).get('events');
         for (const event of conf.events) {
           events.delete(mapTextToType[event]);
         } // for
       } // if
       if (conf.keys) {
-        const keys = this.collectionsMap.get(conf.collection).get("keys");
+        const keys = this.collectionsMap.get(conf.collection).get('keys');
         for (const key of conf.keys) {
           keys.delete(key);
         } // for
@@ -215,4 +203,4 @@ class ArangoChair extends EventEmitter {
   } // unsubscribe()
 }
 
-module.exports = ArangoChair;
+module.exports = ArangoCouch;
