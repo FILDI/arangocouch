@@ -11,6 +11,7 @@ const mapTextToType = {
   'insert/update': 2300,
   delete: 2302,
 };
+
 const mapTypeToText = new Map([
   [2300, 'insert/update'],
   [2302, 'delete'],
