@@ -7,7 +7,7 @@ declare module 'arangocouch' {
     hostname: string;
   }
 
-  interface SubscribeConfig {
+  interface SubscriberConfig {
     collection: string;
     events?: string[];
     keys?: string[];
