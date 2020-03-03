@@ -77,7 +77,7 @@ class ArangoCouch extends EventEmitter {
         const key = entry.data._key;
         const keys = colConf.get('keys');
 
-        if (0 !== keys.size && !events.has(key)) return;
+        if (0 !== keys.size && !keys.has(key)) return;
 
         this.emit(colName, entry.data, mapTypeToText.get(type));
       };
